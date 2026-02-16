@@ -21,7 +21,7 @@ from src.models.train import load_data
 
 
 def build_input_feed(X_ordered, input_names, batch_slice):
-    """Создаёт input_feed для batch_slice."""
+    """Создаёт input_feed для batch_slice"""
     return {
         name: X_ordered[batch_slice, i : i + 1].astype(np.float32)
         for i, name in enumerate(input_names)
@@ -31,7 +31,7 @@ def build_input_feed(X_ordered, input_names, batch_slice):
 def run_load_test(
     sess, X_ordered, input_names, batch_sizes, n_runs=50, n_warmup=5
 ):
-    """Замер latency и throughput для разных размеров батча."""
+    """Замер latency и throughput для разных размеров батча"""
     results = []
     for batch_size in batch_sizes:
         n = min(batch_size, len(X_ordered))
@@ -57,7 +57,7 @@ def run_load_test(
 
 
 def create_session(model_path, providers=None, threads=0):
-    """Создаёт InferenceSession с указанными провайдерами и потоками."""
+    """Создаёт InferenceSession с указанными провайдерами и потоками"""
     opts = ort.SessionOptions()
     if threads > 0:
         opts.intra_op_num_threads = threads
@@ -103,7 +103,7 @@ def main():
         "recommendations": {},
     }
 
-    # Конфигурации: (название, путь к модели, провайдеры, threads)
+    # Конфигурации
     configs = [
         ("onnx_cpu_4threads", onnx_path, cpu_providers, 4),
         ("onnx_cpu_4threads", onnx_path, cpu_providers, 4),
@@ -156,7 +156,7 @@ def main():
                 }
             )
 
-    # Рекомендации: выбираем лучшую конфигурацию по throughput
+    # Рекомендации
     valid = [
         c for c in report["configurations"] if "batch_results" in c
     ]
