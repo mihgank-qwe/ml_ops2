@@ -66,14 +66,21 @@ python -m src.models.train
 python -m src.models.train --experiments 5
 ```
 
+![Image alt](https://github.com/mihgank-qwe/ml_ops2/blob/main/images/img1.png)
+
 ### 4. Запуск API
 
 ```bash
 uvicorn src.api.app:app --reload --host 0.0.0.0 --port 8000
 ```
 
+![Image alt](https://github.com/mihgank-qwe/ml_ops2/blob/main/images/img2.png)
+
 - Swagger: http://localhost:8000/docs
+  ![Image alt](https://github.com/mihgank-qwe/ml_ops2/blob/main/images/img3.png)
+
 - Метрики: http://localhost:8000/metrics
+  ![Image alt](https://github.com/mihgank-qwe/ml_ops2/blob/main/images/img4.png)
 
 ---
 
@@ -94,12 +101,20 @@ uvicorn src.api.app:app --reload --host 0.0.0.0 --port 8000
 Конвертация sklearn-модели в ONNX для ускорения инференса:
 
 ```bash
-# 1. Обучить NN-модель (если нужна ONNX-версия)
+# 1. Обучить NN-модель
 python scripts/model_training/train_nn.py
+```
 
+![Image alt](https://github.com/mihgank-qwe/ml_ops2/blob/main/images/img5.png)
+
+```bash
 # 2. Конвертация в ONNX
 python scripts/model_training/onnx_conversion.py
+```
 
+![Image alt](https://github.com/mihgank-qwe/ml_ops2/blob/main/images/img6.png)
+
+```bash
 # 3. Валидация (сравнение sklearn vs ONNX)
 python scripts/model_training/validate_onnx.py
 
