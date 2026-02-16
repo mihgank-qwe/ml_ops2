@@ -1,0 +1,19 @@
+# ServiceMonitor для Prometheus Operator (kube-prometheus-stack).
+# Использовать при развёртывании через helm install prometheus-community/kube-prometheus-stack
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: credit-scoring-api
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: credit-scoring-api
+  namespaceSelector:
+    any: true
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

@@ -6,12 +6,18 @@ import joblib
 import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
+from prometheus_client import make_asgi_app
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Загрузка модели при старте
 project_root = Path(__file__).resolve().parents[2]
 model_path = project_root / "models" / "credit_default_model.pkl"
 
 app = FastAPI(title="Credit Default Prediction API")
+
+# Prometheus: /metrics — HTTP-метрики (requests, latency) + process metrics
+Instrumentator().instrument(app)
+app.mount("/metrics", make_asgi_app())
 
 if model_path.exists():
     model = joblib.load(model_path)
