@@ -1,0 +1,22 @@
+{
+  "optimization": "dynamic_quantization_int8",
+  "before": {
+    "model_path": "D:\\Projects\\mifi-ml\\ml-ops\\dev2\\models\\model.onnx",
+    "size_mb": 0.0943,
+    "latency_ms": 7.8478,
+    "throughput_samples_per_sec": 763656.82,
+    "auc": 0.7675
+  },
+  "after": {
+    "model_path": "D:\\Projects\\mifi-ml\\ml-ops\\dev2\\models\\model_quantized.onnx",
+    "size_mb": 0.0323,
+    "latency_ms": 6.611,
+    "throughput_samples_per_sec": 906525.74,
+    "auc": 0.7584
+  },
+  "delta": {
+    "size_reduction_percent": 65.69,
+    "speedup": 1.19,
+    "auc_diff": -0.0091
+  }
+}
