@@ -11,10 +11,11 @@ Credit Scoring API экспортирует метрики на `/metrics`:
 ### Вариант 1: Standalone (Prometheus + Grafana)
 
 ```bash
-# 1. Namespace, Prometheus, RBAC
+# 1. Namespace, Prometheus, RBAC, алерты
 kubectl apply -f deployment/monitoring/namespace.yaml
 kubectl apply -f deployment/monitoring/prometheus-configmap.yaml
 kubectl apply -f deployment/monitoring/prometheus-rbac.yaml
+kubectl apply -f deployment/monitoring/alerts/prometheus-rules.yaml
 kubectl apply -f deployment/monitoring/prometheus-deployment.yaml
 
 # 2. Grafana: дашборды из JSON в репозитории
@@ -47,6 +48,11 @@ kubectl apply -f deployment/monitoring/servicemonitor-credit-scoring.yaml
 - **Infrastructure**: Node CPU/Memory, Container CPU/Memory, Targets Health
 
 *Примечание:* Node CPU/Memory требуют node_exporter (входит в kube-prometheus-stack). Container metrics — из kubelet.
+
+## Алерты и Runbook
+
+- **Правила:** `deployment/monitoring/alerts/` — Prometheus alert rules
+- **Runbook:** [docs/runbook.md](../docs/runbook.md) — процедуры реагирования на инциденты
 
 ## Логирование (Loki + Promtail)
 

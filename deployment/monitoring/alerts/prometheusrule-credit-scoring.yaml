@@ -1,0 +1,39 @@
+# PrometheusRule для kube-prometheus-stack (Prometheus Operator)
+# Применить при использовании helm install prometheus-community/kube-prometheus-stack
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: credit-scoring-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: credit-scoring-api
+      rules:
+        - alert: CreditScoringAPIDown
+          expr: up{job="credit-scoring-api"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Credit Scoring API недоступен"
+            description: "Поды не отдают метрики более 2 минут."
+        - alert: CreditScoringAPIHighLatency
+          expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="credit-scoring-api"}[5m])) by (le, handler)) > 2
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Высокая задержка API (p99 > 2s)"
+        - alert: CreditScoringAPIHighErrorRate
+          expr: |
+            (sum(rate(http_requests_total{job="credit-scoring-api",status=~"5.."}[5m])) 
+            / sum(rate(http_requests_total{job="credit-scoring-api"}[5m]))) > 0.05
+            and sum(rate(http_requests_total{job="credit-scoring-api"}[5m])) > 0.01
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Высокий процент ошибок 5xx (>5%)"

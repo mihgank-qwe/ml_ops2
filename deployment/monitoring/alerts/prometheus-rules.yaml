@@ -1,0 +1,70 @@
+# Prometheus alert rules — метрики приложения и инфраструктуры
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: monitoring
+  labels:
+    app: prometheus
+data:
+  alerts.yaml: |
+    groups:
+      - name: credit-scoring-api
+        rules:
+          - alert: CreditScoringAPIDown
+            expr: up{job="credit-scoring-api"} == 0
+            for: 2m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Credit Scoring API недоступен"
+              description: "Поды {{ $labels.pod }} в namespace {{ $labels.namespace }} не отдают метрики более 2 минут."
+
+          - alert: CreditScoringAPIHighLatency
+            expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="credit-scoring-api"}[5m])) by (le, handler)) > 2
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Высокая задержка API"
+              description: "p99 latency > 2s для {{ $labels.handler }}"
+
+          - alert: CreditScoringAPIHighErrorRate
+            expr: |
+              (sum(rate(http_requests_total{job="credit-scoring-api",status=~"5.."}[5m])) 
+              / sum(rate(http_requests_total{job="credit-scoring-api"}[5m]))) > 0.05
+              and sum(rate(http_requests_total{job="credit-scoring-api"}[5m])) > 0.01
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Высокий процент ошибок 5xx"
+              description: "Более 5% запросов возвращают 5xx"
+
+          - alert: CreditScoringAPIHighMemory
+            expr: process_resident_memory_bytes{job="credit-scoring-api"} > 450000000
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Высокое потребление памяти API"
+              description: "Pod {{ $labels.pod }} использует > 450MB RSS"
+
+      - name: infrastructure
+        rules:
+          - alert: TargetDown
+            expr: up == 0
+            for: 2m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Target {{ $labels.job }} недоступен"
+              description: "{{ $labels.instance }} не отдаёт метрики"
+
+          - alert: PrometheusDown
+            expr: up{job="prometheus"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Prometheus недоступен"
