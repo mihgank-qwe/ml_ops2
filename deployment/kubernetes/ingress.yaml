@@ -1,0 +1,21 @@
+# Ingress для доступа к API извне кластера.
+# Заменить host на ваш домен. Для Yandex Cloud: ingress controller в составе Managed K8s.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: credit-scoring-api
+  labels:
+    app: credit-scoring-api
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: credit-scoring.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: credit-scoring-api
+                port:
+                  number: 8000
