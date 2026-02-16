@@ -1,0 +1,18 @@
+# Provisioning Prometheus datasource для Grafana
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource
+  namespace: monitoring
+  labels:
+    app: grafana
+data:
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        uid: prometheus
+        url: http://prometheus.monitoring.svc.cluster.local:9090
+        access: proxy
+        isDefault: true

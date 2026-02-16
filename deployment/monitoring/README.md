@@ -1,4 +1,4 @@
-# Prometheus — мониторинг
+# Prometheus + Grafana — мониторинг
 
 ## Метрики приложения
 
@@ -8,17 +8,23 @@ Credit Scoring API экспортирует метрики на `/metrics`:
 
 ## Развёртывание
 
-### Вариант 1: Standalone Prometheus
+### Вариант 1: Standalone (Prometheus + Grafana)
 
 ```bash
-kubectl apply -f deployment/monitoring/
-```
+# 1. Namespace, Prometheus, RBAC
+kubectl apply -f deployment/monitoring/namespace.yaml
+kubectl apply -f deployment/monitoring/prometheus-configmap.yaml
+kubectl apply -f deployment/monitoring/prometheus-rbac.yaml
+kubectl apply -f deployment/monitoring/prometheus-deployment.yaml
 
-Создаётся:
-- namespace `monitoring`
-- ConfigMap с scrape configs (app, K8s nodes, pods)
-- RBAC для доступа к метрикам кластера
-- Deployment + Service Prometheus
+# 2. Grafana: дашборды из JSON в репозитории
+cd deployment/monitoring && make dashboards && cd ../..
+
+# 3. Grafana deployment
+kubectl apply -f deployment/monitoring/grafana-datasource.yaml
+kubectl apply -f deployment/monitoring/grafana-provisioning.yaml
+kubectl apply -f deployment/monitoring/grafana-deployment.yaml
+```
 
 ### Вариант 2: kube-prometheus-stack (Helm)
 
@@ -26,7 +32,21 @@ kubectl apply -f deployment/monitoring/
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring --create-namespace
 kubectl apply -f deployment/monitoring/servicemonitor-credit-scoring.yaml
+# Импорт дашбордов: Grafana UI → Dashboards → Import → загрузить JSON из dashboards/
 ```
+
+## Дашборды Grafana
+
+| Файл | Описание |
+|------|----------|
+| `dashboards/api-dashboard.json` | Credit Scoring API: RPS, latency (p50/p99), memory, CPU |
+| `dashboards/infrastructure-dashboard.json` | K8s: nodes, pods, containers, targets health |
+
+Панели:
+- **API**: Request Rate, Latency, Requests by Status, Memory, CPU
+- **Infrastructure**: Node CPU/Memory, Container CPU/Memory, Targets Health
+
+*Примечание:* Node CPU/Memory требуют node_exporter (входит в kube-prometheus-stack). Container metrics — из kubelet.
 
 ## Scrape targets
 
