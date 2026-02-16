@@ -31,3 +31,8 @@ variable "gpu_cluster_id" {
   type        = string
   default     = ""
 }
+
+variable "artifacts_bucket_name" {
+  description = "Имя бакета для артефактов (модели, данные). Глобально уникальное."
+  type        = string
+}

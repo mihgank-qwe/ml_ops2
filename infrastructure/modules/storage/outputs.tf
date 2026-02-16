@@ -1,4 +1,4 @@
 output "bucket_name" {
-  description = "Имя бакета Object Storage"
-  value       = yandex_storage_bucket.state.bucket
+  description = "Имя бакета для артефактов"
+  value       = yandex_storage_bucket.artifacts.bucket
 }

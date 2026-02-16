@@ -1,0 +1,5 @@
+environment        = "staging"
+yandex_cloud_id    = "your-cloud-id"
+yandex_folder_id   = "your-folder-id"
+# Имя бакета должно быть глобально уникальным (например: your-org-credit-scoring-state)
+state_bucket_name  = "your-unique-bucket-name-state"

@@ -24,7 +24,9 @@ module "vpc" {
 module "storage" {
   source = "./modules/storage"
 
-  environment = var.environment
+  environment           = var.environment
+  folder_id             = var.yandex_folder_id
+  artifacts_bucket_name = var.artifacts_bucket_name
 }
 
 module "kubernetes" {

@@ -54,5 +54,10 @@ infrastructure/.terraform/
 infrastructure/*.tfstate
 infrastructure/*.tfstate.*
 infrastructure/terraform.tfvars
+infrastructure/backend-config.hcl
+infrastructure/bootstrap/.terraform/
+infrastructure/bootstrap/*.tfstate
+infrastructure/bootstrap/*.tfstate.*
+infrastructure/bootstrap/terraform.tfvars
 *.tfvars
 !*.tfvars.example
