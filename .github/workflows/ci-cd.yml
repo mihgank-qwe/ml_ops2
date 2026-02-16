@@ -152,13 +152,29 @@ print('Валидация Pandera пройдена')
         with:
           version: "v1.28.0"
 
-      - name: Set up kubeconfig
+      # Аутентификация: KUBECONFIG или Yandex Cloud (yc CLI)
+      - name: Set up kubeconfig (KUBECONFIG)
+        if: vars.AUTH_METHOD != 'yandex'
         env:
           KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
         run: |
           mkdir -p ~/.kube
           echo "$KUBECONFIG_CONTENT" > ~/.kube/config
           chmod 600 ~/.kube/config
+
+      - name: Set up kubeconfig (Yandex Cloud)
+        if: vars.AUTH_METHOD == 'yandex'
+        env:
+          YC_SA_KEY: ${{ secrets.YANDEX_SERVICE_ACCOUNT_KEY }}
+          YC_CLUSTER_ID: ${{ vars.YANDEX_CLUSTER_ID }}
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          export PATH="$HOME/yandex-cloud/bin:$HOME/.local/bin:$PATH"
+          echo "$YC_SA_KEY" > sa-key.json
+          yc config profile create ci --service-account-key sa-key.json
+          yc config profile activate ci
+          yc managed-kubernetes cluster get-credentials "$YC_CLUSTER_ID" --external --force
+          rm -f sa-key.json
 
       - name: Update deployment image
         env:

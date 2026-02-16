@@ -21,9 +21,18 @@ kubectl apply -f deployment/kubernetes/
 При push в main/master GitHub Actions автоматически:
 1. Собирает образ и пушит в ghcr.io
 2. Обновляет image в deployment.yaml
-3. Применяет манифесты в кластер
+3. Применяет манифесты в кластер (`kubectl apply -f deployment/kubernetes/`)
+4. Ожидает завершения rollout (`kubectl rollout status`)
 
-**Секреты для deploy:** `KUBECONFIG` — содержимое kubeconfig для доступа к кластеру.
+### Аутентификация
+
+**Вариант 1 — KUBECONFIG (по умолчанию):**
+- Секрет `KUBECONFIG` — содержимое kubeconfig для доступа к кластеру
+
+**Вариант 2 — Yandex Cloud:**
+- Variable `AUTH_METHOD` = `yandex`
+- Variable `YANDEX_CLUSTER_ID` — ID кластера (из `terraform output kubernetes_cluster_id`)
+- Секрет `YANDEX_SERVICE_ACCOUNT_KEY` — JSON-ключ service account с ролью `k8s.clusters.agent`
 
 ## Rolling update
 
