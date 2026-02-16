@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Venv
+venv/
+.venv/
+env/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# DVC
+mlruns/
+.dvc/cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project
+data/processed/*.csv
+models/*.pkl
+roc_curve.png
+
+# Raw data
+data/raw/*.csv
+*.log

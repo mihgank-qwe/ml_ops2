@@ -1,0 +1,22 @@
+[project]
+name = "credit-scoring-model"
+version = "0.1.0"
+description = "PD-модель предсказания дефолта для кредитного скоринга"
+requires-python = ">=3.9"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.dvc
+    | __pycache__
+)/
+'''
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v"

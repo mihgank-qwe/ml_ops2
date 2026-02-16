@@ -1,0 +1,15 @@
+__pycache__
+*.pyc
+.git
+.gitignore
+.venv
+venv
+mlruns
+.dvc
+*.dvc
+.pytest_cache
+*.egg-info
+examples
+notebooks
+*.md
+!README.md
