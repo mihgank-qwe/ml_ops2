@@ -40,5 +40,5 @@ terraform plan
 ## Модули
 
 - **vpc** — сеть, подсеть 10.0.1.0/24, security groups (K8s API 6443, HTTP/HTTPS, API 8000)
-- **kubernetes** — Managed Kubernetes 1.28, node group (2x2 vCPU, 4 GB)
+- **kubernetes** — Managed Kubernetes 1.28, CPU node group (4 vCPU, 8 GB) с auto_scale 2–10, preemptible для non-production; опционально GPU node group
 - **storage** — бакет для state и артефактов

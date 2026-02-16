@@ -5,3 +5,7 @@ environment        = "staging"
 zone               = "ru-central1-a"
 yandex_cloud_id    = "your-cloud-id"
 yandex_folder_id   = "your-folder-id"
+
+# GPU node group (опционально)
+# enable_gpu_nodes = true
+# gpu_cluster_id   = "your-gpu-cluster-id"

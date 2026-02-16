@@ -36,6 +36,8 @@ module "kubernetes" {
   subnet_id              = module.vpc.subnet_id
   zone                   = var.zone
   master_security_groups = [module.vpc.k8s_security_group_id]
+  enable_gpu_nodes       = var.enable_gpu_nodes
+  gpu_cluster_id         = var.gpu_cluster_id
 }
 
 module "monitoring" {

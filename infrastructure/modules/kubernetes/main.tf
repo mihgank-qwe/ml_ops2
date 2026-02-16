@@ -76,23 +76,70 @@ resource "yandex_kubernetes_cluster" "credit_scoring" {
 resource "yandex_kubernetes_node_group" "cpu_nodes" {
   cluster_id  = yandex_kubernetes_cluster.credit_scoring.id
   name        = "cpu-nodes-${var.environment}"
-  description = "CPU node group"
+  description = "CPU node group (4 vCPU, 8 GB)"
 
   instance_template {
     platform_id = "standard-v3"
     resources {
-      memory = 4
-      cores  = 2
+      memory = 8
+      cores  = 4
     }
     boot_disk {
       type = "network-ssd"
       size = 64
     }
+    scheduling_policy {
+      preemptible = var.environment != "production"
+    }
   }
 
   scale_policy {
-    fixed_scale {
-      size = 2
+    auto_scale {
+      min     = 2
+      max     = 10
+      initial = 2
+    }
+  }
+
+  allocation_policy {
+    location {
+      zone = var.zone
+    }
+  }
+}
+
+# GPU node group (опционально). Требует предварительно созданный GPU cluster в Yandex Cloud.
+# Включить: enable_gpu_nodes = true, указать gpu_cluster_id.
+resource "yandex_kubernetes_node_group" "gpu_nodes" {
+  count = var.enable_gpu_nodes && var.gpu_cluster_id != "" ? 1 : 0
+
+  cluster_id  = yandex_kubernetes_cluster.credit_scoring.id
+  name        = "gpu-nodes-${var.environment}"
+  description = "GPU node group для ML inference"
+
+  instance_template {
+    platform_id = "gpu-standard-v3"
+    resources {
+      memory = 32
+      cores  = 8
+      gpu {
+        gpu_cluster_id = var.gpu_cluster_id
+      }
+    }
+    boot_disk {
+      type = "network-ssd"
+      size = 64
+    }
+    scheduling_policy {
+      preemptible = var.environment != "production"
+    }
+  }
+
+  scale_policy {
+    auto_scale {
+      min     = 0
+      max     = 2
+      initial = 0
     }
   }
 

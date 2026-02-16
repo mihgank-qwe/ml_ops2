@@ -28,3 +28,15 @@ variable "master_security_groups" {
   type        = list(string)
   default     = []
 }
+
+variable "enable_gpu_nodes" {
+  description = "Создать node group с GPU (если доступно в облаке)"
+  type        = bool
+  default     = false
+}
+
+variable "gpu_cluster_id" {
+  description = "ID GPU cluster в Yandex Cloud (нужен для GPU node group)"
+  type        = string
+  default     = ""
+}
