@@ -48,3 +48,11 @@ roc_curve.png
 # Raw data
 data/raw/*.csv
 *.log
+
+# Terraform
+infrastructure/.terraform/
+infrastructure/*.tfstate
+infrastructure/*.tfstate.*
+infrastructure/terraform.tfvars
+*.tfvars
+!*.tfvars.example

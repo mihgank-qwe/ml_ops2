@@ -1,0 +1,7 @@
+# Скопируйте в terraform.tfvars и заполните значения.
+# terraform.tfvars не коммитить (добавьте в .gitignore)!
+
+environment        = "staging"
+zone               = "ru-central1-a"
+yandex_cloud_id    = "your-cloud-id"
+yandex_folder_id   = "your-folder-id"
