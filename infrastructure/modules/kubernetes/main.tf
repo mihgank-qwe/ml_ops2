@@ -57,8 +57,9 @@ resource "yandex_kubernetes_cluster" "credit_scoring" {
     version  = "1.28"
     public_ip = true
     zonal {
-      zone      = var.zone
-      subnet_id = var.subnet_id
+      zone                = var.zone
+      subnet_id           = var.subnet_id
+      security_group_ids  = var.master_security_groups
     }
   }
 

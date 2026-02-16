@@ -22,3 +22,9 @@ variable "zone" {
   description = "Зона доступности"
   type        = string
 }
+
+variable "master_security_groups" {
+  description = "Security groups для master нод Kubernetes"
+  type        = list(string)
+  default     = []
+}

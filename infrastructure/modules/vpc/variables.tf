@@ -7,3 +7,4 @@ variable "zone" {
   description = "Зона доступности"
   type        = string
 }
+

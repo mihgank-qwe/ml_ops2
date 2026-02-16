@@ -17,3 +17,8 @@ output "storage_bucket_name" {
   description = "Имя бакета Object Storage"
   value       = module.storage.bucket_name
 }
+
+output "k8s_security_group_id" {
+  description = "ID security group для Kubernetes"
+  value       = module.vpc.k8s_security_group_id
+}

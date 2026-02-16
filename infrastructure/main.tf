@@ -30,11 +30,12 @@ module "storage" {
 module "kubernetes" {
   source = "./modules/kubernetes"
 
-  environment       = var.environment
-  folder_id         = var.yandex_folder_id
-  network_id        = module.vpc.network_id
-  subnet_id         = module.vpc.subnet_id
-  zone              = var.zone
+  environment            = var.environment
+  folder_id              = var.yandex_folder_id
+  network_id             = module.vpc.network_id
+  subnet_id              = module.vpc.subnet_id
+  zone                   = var.zone
+  master_security_groups = [module.vpc.k8s_security_group_id]
 }
 
 module "monitoring" {
