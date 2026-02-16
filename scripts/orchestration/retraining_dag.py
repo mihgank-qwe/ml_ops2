@@ -3,6 +3,11 @@ Airflow DAG: пайплайн переобучения модели кредит
 
 Цепочка: check_data_drift => retrain_model => validate_new_model => deploy_canary_release
 
+Триггеры переобучения:
+  1. По расписанию — еженедельно (schedule_interval=timedelta(weeks=1))
+  2. По данным/дрифту — DAG drift_check_trigger (ежедневно) при drift_detected
+     запускает этот DAG через TriggerDagRunOperator
+
 Переменные Airflow (Admin => Variables):
   - IMAGE_REGISTRY: registry для образов (например ghcr.io/owner)
   - mlflow_tracking_uri: URI MLflow (например http://mlflow:5000)

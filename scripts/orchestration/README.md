@@ -9,6 +9,22 @@
 3. **validate_new_model** — валидация модели
 4. **deploy_canary_release** — canary-деплой новой версии
 
+## drift_trigger_dag.py
+
+DAG проверки дрифта и условного запуска переобучения:
+
+- **Расписание:** ежедневно (`@daily`)
+- **check_data_drift** — запускает `evidently_drift_report.py --output-json`, читает `drift_detected`
+- **trigger_retraining** — при дрифте запускает `credit_scoring_retraining` через `TriggerDagRunOperator`
+- **skip_retraining** — при отсутствии дрифта — пропуск
+
+## Триггеры переобучения (7.2)
+
+| Триггер          | Описание                                                                         |
+| ---------------- | -------------------------------------------------------------------------------- |
+| По расписанию    | Еженедельно (`retraining_dag`, `timedelta(weeks=1)`)                             |
+| По данным/дрифту | Ежедневно `drift_check_trigger` → при `drift_detected` → `TriggerDagRunOperator` |
+
 ## Переменные Airflow
 
 | Variable            | Описание                    | Пример             |
@@ -25,8 +41,9 @@ Admin => Variables => Add
 
 ```bash
 cp scripts/orchestration/retraining_dag.py $AIRFLOW_HOME/dags/
+cp scripts/orchestration/drift_trigger_dag.py $AIRFLOW_HOME/dags/
 # или симлинк
-ln -s $(pwd)/scripts/orchestration/retraining_dag.py $AIRFLOW_HOME/dags/
+ln -s $(pwd)/scripts/orchestration/*.py $AIRFLOW_HOME/dags/
 ```
 
 ## Образы
@@ -38,4 +55,5 @@ ln -s $(pwd)/scripts/orchestration/retraining_dag.py $AIRFLOW_HOME/dags/
 
 ## Расписание
 
-По умолчанию: еженедельно (`schedule_interval=timedelta(weeks=1)`).
+- **credit_scoring_retraining:** еженедельно (`schedule_interval=timedelta(weeks=1)`) + по триггеру от drift_check_trigger
+- **drift_check_trigger:** ежедневно (`@daily`)

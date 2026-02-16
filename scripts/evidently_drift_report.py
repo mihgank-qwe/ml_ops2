@@ -8,6 +8,7 @@
   python scripts/evidently_drift_report.py
   python scripts/evidently_drift_report.py --current data/processed/current.csv
   python scripts/evidently_drift_report.py --current data/processed/test.csv  # срез из теста
+  python scripts/evidently_drift_report.py --fallback-test --output-json monitoring/reports/drift_status.json  # для Airflow
 """
 
 import argparse
@@ -45,6 +46,12 @@ def main():
         "--fallback-test",
         action="store_true",
         help="Если current.csv отсутствует — использовать срез из test.csv",
+    )
+    parser.add_argument(
+        "--output-json",
+        type=Path,
+        default=None,
+        help="Путь для JSON с флагом drift_detected (для триггера Airflow)",
     )
     args = parser.parse_args()
 
@@ -109,6 +116,47 @@ def main():
     obj = result if result is not None else report
     obj.save_html(str(output_path))
     print(f"Отчёт сохранён: {output_path}")
+
+    # JSON для триггера переобучения (drift_detected)
+    drift_detected = _extract_drift_status(obj)
+    if args.output_json:
+        import json
+        args.output_json.parent.mkdir(parents=True, exist_ok=True)
+        with open(args.output_json, "w", encoding="utf-8") as f:
+            json.dump({"drift_detected": drift_detected}, f, indent=2)
+        print(f"Drift status: {drift_detected} -> {args.output_json}")
+
+
+def _extract_drift_status(report_obj) -> bool:
+    """Извлекает флаг dataset_drift из отчёта Evidently."""
+    import json
+    d = None
+    try:
+        d = report_obj.as_dict()
+    except (AttributeError, TypeError):
+        pass
+    if d is None:
+        try:
+            j = report_obj.json()
+            d = json.loads(j) if isinstance(j, str) else j
+        except (AttributeError, TypeError, json.JSONDecodeError):
+            return True  # при ошибке — считаем дрифт (безопаснее переобучить)
+    if not isinstance(d, dict):
+        return True
+    # DatasetDriftMetric / DataDriftPreset / DataDriftTable
+    metrics = d.get("metrics", d)
+    if not isinstance(metrics, dict):
+        return True
+    for key in ("DatasetDriftMetric", "DataDriftPreset", "DataDriftTable"):
+        m = metrics.get(key, {})
+        if isinstance(m, dict):
+            r = m.get("result", m)
+            if isinstance(r, dict):
+                if "dataset_drift" in r:
+                    return bool(r["dataset_drift"])
+                if "share_of_drifted_columns" in r:
+                    return float(r.get("share_of_drifted_columns", 0)) >= 0.5
+    return True
 
 
 if __name__ == "__main__":
