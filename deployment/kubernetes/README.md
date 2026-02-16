@@ -18,6 +18,8 @@ kubectl apply -f deployment/kubernetes/
 
 ## CI/CD
 
+**Security scanning:** Trivy (vulnerability scan) и Dockle (best practices) — образ проверяется до push. Исключения: `.trivyignore`.
+
 При push в main/master GitHub Actions автоматически:
 1. Собирает образ и пушит в ghcr.io
 2. Обновляет image в deployment.yaml

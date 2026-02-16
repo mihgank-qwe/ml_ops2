@@ -36,6 +36,16 @@ jobs:
       - name: Run Flake8
         run: flake8 src tests --max-line-length=88 --extend-ignore=E203,W503
 
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+          ignore-unfixed: true
+          skip-dirs: 'data,.git,__pycache__,.pytest_cache'
+
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -127,16 +137,45 @@ print('Валидация Pandera пройдена')
             type=sha,prefix=
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
 
-      - name: Build and push Docker image
+      - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          load: true
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Get image ref for scan
+        id: img
+        run: |
+          REF=$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1)
+          echo "ref=$REF" >> $GITHUB_OUTPUT
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          image-ref: ${{ steps.img.outputs.ref }}
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+          ignore-unfixed: true
+
+      - name: Run Dockle container linter
+        uses: goodwithtech/dockle-action@v0.4.15
+        with:
+          image: ${{ steps.img.outputs.ref }}
+          exit-code: '1'
+          exit-level: 'FATAL'
+
+      - name: Push Docker image
+        if: github.event_name != 'pull_request'
+        run: |
+          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr ',' ' '); do
+            docker push "$tag"
+          done
 
   deploy-to-kubernetes:
     name: Deploy to Kubernetes
