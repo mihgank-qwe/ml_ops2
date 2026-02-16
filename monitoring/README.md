@@ -26,6 +26,20 @@ python scripts/evidently_drift_report.py --reference data/processed/train.csv --
 
 - `monitoring/reports/drift_report.html` — HTML-отчёт с DataDriftTable
 
+## Concept Drift & Model Quality
+
+Скрипт `scripts/evidently_concept_drift_report.py` — мониторинг concept drift и деградации качества:
+
+- **Target Drift** — дрифт целевой переменной
+- **Prediction Drift** — дрифт предсказаний
+- **Classification Quality** — accuracy, precision, recall, ROC AUC
+
+```bash
+python scripts/evidently_concept_drift_report.py --fallback-test
+```
+
+Выход: `monitoring/reports/concept_drift_report.html`
+
 ### Получение current из API
 
 Для получения current среза из API можно использовать:
