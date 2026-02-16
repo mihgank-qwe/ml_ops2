@@ -1,0 +1,14 @@
+{
+  "n_samples": 5993,
+  "n_warmup": 10,
+  "n_runs": 100,
+  "sklearn": {
+    "latency_ms": 13.4884,
+    "throughput_samples_per_sec": 444306.58
+  },
+  "onnx": {
+    "latency_ms": 7.1933,
+    "throughput_samples_per_sec": 833141.14
+  },
+  "speedup": 1.88
+}
