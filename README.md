@@ -1,88 +1,129 @@
 # Credit Default Prediction (PD-Model)
 
-Сквозной автоматизированный пайплайн для PD-модели предсказания дефолта клиентов на датасете UCI Credit Card.
+Сквозной MLOps-пайплайн для PD-модели предсказания дефолта клиентов на датасете UCI Credit Card.
 
-## Структура проекта
+---
+
+## Структура репозитория
 
 ```
 ├── data/
-│   ├── raw/           # Исходные данные (UCI_Credit_Card.csv)
-│   ├── processed/     # train.csv, test.csv
-│   └── expectations/  # Правила валидации
-├── models/            # Обученные модели
-├── notebooks/         # EDA и эксперименты
+│   ├── raw/              # Исходные данные (UCI_Credit_Card.csv)
+│   ├── processed/        # train.csv, test.csv, current.csv
+│   └── expectations/     # Great Expectations
+├── models/               # Обученные модели (.pkl, .onnx)
+├── notebooks/            # EDA и эксперименты
 ├── src/
-│   ├── data/          # make_dataset.py, validation.py
-│   ├── features/      # build_features.py
-│   ├── models/        # pipeline.py, train.py, predict.py
-│   └── api/           # FastAPI приложение
-├── tests/             # Unit-тесты
-├── scripts/           # Скрипты запуска и мониторинга
-├── .github/workflows/ # CI/CD
-├── dvc.yaml           # DVC pipeline
+│   ├── data/             # make_dataset.py, validation.py
+│   ├── features/         # build_features.py
+│   ├── models/           # pipeline.py, train.py
+│   └── api/              # FastAPI приложение
+├── tests/                # Unit-тесты
+├── scripts/
+│   ├── model_training/   # onnx_conversion, benchmark, load_test
+│   ├── orchestration/    # Airflow DAG (retraining, drift_trigger)
+│   └── evidently_*.py   # Дрифт-отчёты
+├── monitoring/
+│   └── reports/         # drift_report.html, drift_status.json
+├── deployment/
+│   ├── kubernetes/       # Deployment, Service, Ingress, ConfigMap
+│   └── monitoring/      # Prometheus, Grafana, Loki, Promtail
+├── infrastructure/       # Terraform (Yandex Cloud)
+├── docs/                 # Runbook, архитектура
+├── .github/workflows/    # CI/CD
+├── dvc.yaml              # DVC pipeline
 ├── Dockerfile
 └── requirements.txt
 ```
 
-## Установка
+---
+
+## Быстрый старт
+
+### 1. Установка
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Запуск пайплайна
-
-### 1. Подготовка данных
+### 2. Подготовка данных
 
 ```bash
 python src/data/make_dataset.py data/raw/UCI_Credit_Card.csv data/processed/
 ```
 
-### 2. Обучение модели
+### 3. Обучение модели
 
 ```bash
-python src/models/train.py
+python -m src.models.train
 ```
 
-Один запуск: одна модель в `models/credit_default_model.pkl`, метрики в `metrics.json` и MLflow.
+Модель сохраняется в `models/credit_default_model.pkl`, метрики — в `metrics.json` и MLflow.
 
-**5 экспериментов для MLflow:**
+**5 экспериментов (гиперпараметры):**
 
 ```bash
-python src/models/train.py --experiments 5
+python -m src.models.train --experiments 5
 ```
 
-В MLflow появятся 5 запусков с разными гиперпараметрами. Просмотр: `mlflow ui`.
-
-### 3. EDA
-
-Ноутбук разведки: `notebooks/01_eda.ipynb`.
-
-### 4. DVC pipeline (опционально)
-
-```bash
-dvc init
-dvc repro
-```
-
-### 5. Запуск API
+### 4. Запуск API
 
 ```bash
 uvicorn src.api.app:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Документация: http://localhost:8000/docs
+- Swagger: http://localhost:8000/docs
+- Метрики: http://localhost:8000/metrics
 
-### 6. Docker
+---
+
+## Обучение
+
+| Команда                                      | Описание                                                |
+| -------------------------------------------- | ------------------------------------------------------- |
+| `python -m src.models.train`                 | Один запуск, модель в `models/credit_default_model.pkl` |
+| `python -m src.models.train --experiments 5` | 5 экспериментов в MLflow                                |
+| `dvc repro`                                  | Полный DVC-пайплайн (данные => обучение)                |
+
+**Выходы:** `models/credit_default_model.pkl`, `metrics.json`, артефакты в MLflow (`mlflow ui`).
+
+---
+
+## ONNX
+
+Конвертация sklearn-модели в ONNX для ускорения инференса:
 
 ```bash
-docker build -t credit-api .
-docker run -p 8000:8000 credit-api
+# 1. Обучить NN-модель (если нужна ONNX-версия)
+python scripts/model_training/train_nn.py
+
+# 2. Конвертация в ONNX
+python scripts/model_training/onnx_conversion.py
+
+# 3. Валидация (сравнение sklearn vs ONNX)
+python scripts/model_training/validate_onnx.py
+
+# 4. Бенчмарк производительности
+python scripts/model_training/benchmark_inference.py
 ```
 
-Или используйте скрипт: `./scripts/build_and_run.sh` (Linux/Mac) или `scripts\build_and_run.ps1` (Windows).
+**Выходы:** `models/model.onnx`, `models/model_quantized.onnx`, `models/benchmark_results.json`.
 
-### 7. Пример запроса к API
+Подробнее: [docs/BENCHMARK_REPORT.md](docs/BENCHMARK_REPORT.md).
+
+---
+
+## API
+
+**FastAPI** с эндпоинтами:
+
+| Endpoint   | Метод | Описание                                 |
+| ---------- | ----- | ---------------------------------------- |
+| `/predict` | POST  | Предсказание дефолта (JSON с признаками) |
+| `/metrics` | GET   | Prometheus-метрики                       |
+| `/docs`    | GET   | Swagger UI                               |
+
+**Пример запроса:**
 
 ```bash
 curl -X POST http://localhost:8000/predict \
@@ -99,57 +140,88 @@ curl -X POST http://localhost:8000/predict \
   }'
 ```
 
-### 8. Мониторинг дрифта
+---
+
+## Docker
 
 ```bash
-# Запустите API, затем:
-python scripts/drift_monitor.py --api-url http://localhost:8000
+docker build -t credit-scoring-api .
+docker run -p 8000:8000 credit-scoring-api
 ```
 
-## Демонстрация результатов
+Или: `./scripts/build_and_run.sh` (Linux/Mac) / `scripts\build_and_run.ps1` (Windows).
 
-### Резюме проекта
+---
 
-Реализован сквозной пайплайн: загрузка и валидация данных (Pandera, Great Expectations в CI), feature engineering, обучение модели (Sklearn Pipeline + GradientBoosting), логирование в MLflow, DVC-пайплайн, REST API (FastAPI), Docker, мониторинг дрифта (PSI), unit-тесты и CI (GitHub Actions).
+## Kubernetes
 
-### Результаты модели (тестовая выборка)
-
-После обучения (`python src/models/train.py` или `dvc repro`) метрики сохраняются в `metrics.json` и в MLflow. Пример итоговых метрик на отложенной выборке:
-
-| Метрика   | Значение |
-| --------- | -------- |
-| ROC-AUC   | 0.776    |
-| Precision | 0.67     |
-| Recall    | 0.36     |
-| F1-Score  | 0.47     |
-
-При запуске `python src/models/train.py --experiments 5` в MLflow появляется 5 запусков с разными гиперпараметрами. лучший по AUC можно выбрать в UI (`mlflow ui` => http://localhost:5000).
-
-### Выходы пайплайна
-
-| Этап    | Вход                           | Выход                                                                 |
-| ------- | ------------------------------ | --------------------------------------------------------------------- |
-| prepare | `data/raw/UCI_Credit_Card.csv` | `data/processed/train.csv`, `test.csv`                                |
-| train   | train.csv, test.csv            | `models/credit_default_model.pkl`, `metrics.json`, артефакты в MLflow |
-
-### Пример ответа API
-
-Запрос `POST /predict` с JSON признаков клиента возвращает класс и вероятность дефолта:
-
-```json
-{
-  "default_prediction": 1,
-  "default_probability": 0.82
-}
+```bash
+kubectl apply -f deployment/kubernetes/
 ```
 
-Интерактивная документация и проверка: http://localhost:8000/docs после запуска `uvicorn src.api.app:app --reload`.
+Манифесты: Deployment, Service, Ingress, ConfigMap, Secret. Подробнее: [deployment/kubernetes/README.md](deployment/kubernetes/README.md).
 
-### Где посмотреть
+---
 
-- **Эксперименты и метрики:** `mlflow ui` => http://localhost:5000
-- **CI (тесты, линтинг, валидация):** вкладка Actions в репозитории GitHub
-- **EDA:** ноутбук `notebooks/01_eda.ipynb`
+## Мониторинг
+
+**Prometheus + Grafana + Loki + Promtail** — см. [deployment/monitoring/README.md](deployment/monitoring/README.md).
+
+- **Метрики API:** `/metrics` (requests, latency, CPU, memory)
+- **Дашборды:** API, инфраструктура K8s
+- **Логи:** Loki + Promtail
+- **Алерты:** Prometheus rules, [docs/runbook.md](docs/runbook.md)
+
+---
+
+## Дрифт
+
+**Evidently AI** — data drift и concept drift:
+
+```bash
+# Data drift
+python scripts/evidently_drift_report.py --fallback-test
+
+# Concept drift + качество модели
+python scripts/evidently_concept_drift_report.py --fallback-test
+
+# JSON для триггера Airflow
+python scripts/evidently_drift_report.py --fallback-test --output-json monitoring/reports/drift_status.json
+```
+
+Отчёты: `monitoring/reports/drift_report.html`, `concept_drift_report.html`. Подробнее: [monitoring/README.md](monitoring/README.md).
+
+---
+
+## Airflow (переобучение)
+
+DAG-и в `scripts/orchestration/`:
+
+| DAG                         | Расписание                | Описание                                       |
+| --------------------------- | ------------------------- | ---------------------------------------------- |
+| `credit_scoring_retraining` | Еженедельно + по триггеру | check_drift => retrain => validate => deploy   |
+| `drift_check_trigger`       | Ежедневно                 | Проверка дрифта => при drift запуск retraining |
+
+**Размещение:**
+
+```bash
+cp scripts/orchestration/*.py $AIRFLOW_HOME/dags/
+```
+
+Подробнее: [scripts/orchestration/README.md](scripts/orchestration/README.md).
+
+---
+
+## CI/CD
+
+GitHub Actions: build => test => Trivy/Dockle => build-and-push-docker => deploy.
+
+| Окружение  | Триггер              | Namespace  |
+| ---------- | -------------------- | ---------- |
+| Staging    | `develop`, теги `v*` | staging    |
+| Production | `main`               | production |
+
+Подробнее: [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml).
 
 ---
 
@@ -157,21 +229,17 @@ python scripts/drift_monitor.py --api-url http://localhost:8000
 
 ```bash
 pytest tests -v
-```
-
-![Image alt](https://github.com/mihgank-qwe/mpl_ops1/blob/main/images/img1.png)
-
-```bash
 black --check src tests
 flake8 src tests --max-line-length=88
 ```
 
-## MLflow
+---
 
-Просмотр экспериментов:
+## Документация
 
-```bash
-mlflow ui
-```
-
-Откройте http://localhost:5000
+| Документ                                             | Описание                 |
+| ---------------------------------------------------- | ------------------------ |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)         | Архитектура системы      |
+| [docs/runbook.md](docs/runbook.md)                   | Реагирование на алерты   |
+| [docs/BENCHMARK_REPORT.md](docs/BENCHMARK_REPORT.md) | Бенчмарк ONNX            |
+| [infrastructure/README.md](infrastructure/README.md) | Terraform (Yandex Cloud) |
