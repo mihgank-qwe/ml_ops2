@@ -1,15 +1,38 @@
-__pycache__
-*.pyc
+# Git
 .git
 .gitignore
+
+# Python
 .venv
 venv
-mlruns
-.dvc
-*.dvc
+__pycache__
+*.pyc
 .pytest_cache
-*.egg-info
-examples
-notebooks
+.mypy_cache
+
+# DVC cache (данные подтягиваются через dvc pull)
+.dvc/cache
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Docs, zadanie
+zadanie
+zadanie.md
+docs
 *.md
 !README.md
+
+# Infrastructure (не нужна в образе)
+infrastructure
+
+# Tests (опционально — можно исключить для меньшего образа)
+# tests
+
+# Misc
+.DS_Store
+*.log
+mlruns
