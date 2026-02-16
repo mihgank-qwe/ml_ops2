@@ -48,6 +48,10 @@ kubectl apply -f deployment/monitoring/servicemonitor-credit-scoring.yaml
 
 *Примечание:* Node CPU/Memory требуют node_exporter (входит в kube-prometheus-stack). Container metrics — из kubelet.
 
+## Логирование (Loki + Promtail)
+
+Централизованный сбор логов: `deployment/monitoring/logging/`. См. [logging/README.md](logging/README.md).
+
 ## Scrape targets
 
 | Job | Описание |
