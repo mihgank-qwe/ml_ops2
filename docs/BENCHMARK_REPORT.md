@@ -10,7 +10,7 @@
 | `model.onnx`              | ~0.09 MB | ONNX float32                     |
 | `model_quantized.onnx`    | ~0.03 MB | ONNX int8 (dynamic quantization) |
 
-**Сжатие после квантизации:** ~66% (0.09 MB → 0.03 MB)
+**Сжатие после квантизации:** ~66% (0.09 MB => 0.03 MB)
 
 ---
 

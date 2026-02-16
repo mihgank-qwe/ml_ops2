@@ -14,22 +14,26 @@
 **Действия:**
 
 1. Проверить статус подов:
+
    ```bash
    kubectl get pods -n production -l app=credit-scoring-api
    kubectl get pods -n staging -l app=credit-scoring-api
    ```
 
 2. Проверить логи:
+
    ```bash
    kubectl logs -n production -l app=credit-scoring-api --tail=100
    ```
 
 3. Проверить события:
+
    ```bash
    kubectl get events -n production --sort-by='.lastTimestamp'
    ```
 
 4. Перезапустить deployment при необходимости:
+
    ```bash
    kubectl rollout restart deployment/credit-scoring-api -n production
    kubectl rollout status deployment/credit-scoring-api -n production
@@ -53,11 +57,13 @@
 1. Определить проблемный endpoint (labels в алерте).
 
 2. Проверить нагрузку:
+
    ```bash
    kubectl top pods -n production -l app=credit-scoring-api
    ```
 
 3. Увеличить реплики при нехватке мощности:
+
    ```bash
    kubectl scale deployment/credit-scoring-api -n production --replicas=4
    ```
@@ -76,6 +82,7 @@
 **Действия:**
 
 1. Проверить логи на ошибки:
+
    ```bash
    kubectl logs -n production -l app=credit-scoring-api --tail=200 | grep -i error
    ```
@@ -128,7 +135,7 @@
 
 ## Алерты по логам (Loki / Grafana)
 
-Настроить в Grafana: Alerting → Alert rules → New alert rule.
+Настроить в Grafana: Alerting => Alert rules => New alert rule.
 
 **Пример: ошибки в логах API**
 
@@ -137,7 +144,7 @@
 
 **Действия при срабатывании:**
 
-1. Открыть Explore → Loki, запрос `{app="credit-scoring-api"} |= "error"`.
+1. Открыть Explore => Loki, запрос `{app="credit-scoring-api"} |= "error"`.
 
 2. Проанализировать стек-трейсы и контекст.
 
@@ -147,11 +154,11 @@
 
 ## Эскалация
 
-| Уровень | Действие |
-|---------|----------|
-| L1 | Проверка по runbook, базовые команды |
-| L2 | Глубокий анализ, изменение конфигурации |
-| L3 | Откат, масштабирование, привлечение разработки |
+| Уровень | Действие                                       |
+| ------- | ---------------------------------------------- |
+| L1      | Проверка по runbook, базовые команды           |
+| L2      | Глубокий анализ, изменение конфигурации        |
+| L3      | Откат, масштабирование, привлечение разработки |
 
 **Контакты:** указать в настройках Alertmanager / Grafana contact points.
 

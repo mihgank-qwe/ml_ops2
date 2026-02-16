@@ -20,20 +20,21 @@ kubectl apply -f deployment/monitoring/logging/promtail-daemonset.yaml
 
 ## Просмотр логов
 
-Grafana → Explore → выбрать datasource **Loki** → LogQL.
+Grafana => Explore => выбрать datasource **Loki** => LogQL.
 
 Примеры запросов:
+
 - `{namespace="production"}` — логи из production
 - `{app="credit-scoring-api"}` — логи API
 - `{namespace="staging"} |= "error"` — ошибки в staging
 
 ## Конфигурация
 
-| Метрика | Значение |
-|---------|----------|
-| Retention | 7 дней |
-| Хранилище | emptyDir (для production — PVC) |
-| Лейблы | namespace, pod, container, app, node |
+| Метрика   | Значение                             |
+| --------- | ------------------------------------ |
+| Retention | 7 дней                               |
+| Хранилище | emptyDir (для production — PVC)      |
+| Лейблы    | namespace, pod, container, app, node |
 
 ## Альтернатива: ELK
 

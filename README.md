@@ -123,7 +123,7 @@ python scripts/drift_monitor.py --api-url http://localhost:8000
 | Recall    | 0.36     |
 | F1-Score  | 0.47     |
 
-При запуске `python src/models/train.py --experiments 5` в MLflow появляется 5 запусков с разными гиперпараметрами. лучший по AUC можно выбрать в UI (`mlflow ui` → http://localhost:5000).
+При запуске `python src/models/train.py --experiments 5` в MLflow появляется 5 запусков с разными гиперпараметрами. лучший по AUC можно выбрать в UI (`mlflow ui` => http://localhost:5000).
 
 ### Выходы пайплайна
 
@@ -147,7 +147,7 @@ python scripts/drift_monitor.py --api-url http://localhost:8000
 
 ### Где посмотреть
 
-- **Эксперименты и метрики:** `mlflow ui` → http://localhost:5000
+- **Эксперименты и метрики:** `mlflow ui` => http://localhost:5000
 - **CI (тесты, линтинг, валидация):** вкладка Actions в репозитории GitHub
 - **EDA:** ноутбук `notebooks/01_eda.ipynb`
 

@@ -22,19 +22,21 @@ kubectl apply -f deployment/kubernetes/
 
 ### Окружения
 
-| Окружение | Триггер | Namespace |
-|-----------|---------|-----------|
-| **Staging** | push в `develop`, теги `v*` | staging |
-| **Production** | push в `main` | production |
+| Окружение      | Триггер                     | Namespace  |
+| -------------- | --------------------------- | ---------- |
+| **Staging**    | push в `develop`, теги `v*` | staging    |
+| **Production** | push в `main`               | production |
 
-Для каждого окружения создать GitHub Environment (Settings → Environments) с отдельными секретами.
+Для каждого окружения создать GitHub Environment (Settings => Environments) с отдельными секретами.
 
 ### Аутентификация
 
 **Вариант 1 — KUBECONFIG (по умолчанию):**
+
 - Секрет `KUBECONFIG` — содержимое kubeconfig (разные значения для staging/production)
 
 **Вариант 2 — Yandex Cloud:**
+
 - Variable `AUTH_METHOD` = `yandex`
 - Variable `YANDEX_CLUSTER_ID` — ID кластера (разные для staging/production)
 - Секрет `YANDEX_SERVICE_ACCOUNT_KEY` — JSON-ключ service account

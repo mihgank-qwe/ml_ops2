@@ -2,7 +2,7 @@
 #
 # Варианты развёртывания:
 # 1. Yandex Monitoring (managed) — метрики из Compute, K8s собираются автоматически.
-#    Дашборды: консоль Yandex Cloud → Monitoring.
+#    Дашборды: консоль Yandex Cloud => Monitoring.
 # 2. Prometheus + Grafana в Kubernetes — helm install prometheus-community/kube-prometheus-stack.
 # 3. Managed Service for Prometheus (если доступен в провайдере).
 #
