@@ -46,4 +46,6 @@ module "monitoring" {
   source = "./modules/monitoring"
 
   environment = var.environment
+  folder_id   = var.yandex_folder_id
+  cluster_id  = module.kubernetes.cluster_id
 }

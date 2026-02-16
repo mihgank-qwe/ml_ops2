@@ -1,4 +1,4 @@
 output "placeholder" {
-  description = "Заглушка для будущих настроек мониторинга"
-  value       = "monitoring-${var.environment}"
+  description = "Заглушка — расширить в этапе 5"
+  value       = local.monitoring_placeholder
 }

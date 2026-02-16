@@ -22,3 +22,8 @@ output "k8s_security_group_id" {
   description = "ID security group для Kubernetes"
   value       = module.vpc.k8s_security_group_id
 }
+
+output "monitoring_placeholder" {
+  description = "Заглушка мониторинга (расширить в этапе 5)"
+  value       = module.monitoring.placeholder
+}
